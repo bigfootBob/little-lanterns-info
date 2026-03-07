@@ -1,0 +1,20 @@
+// Centering 
+@mixin flex-center {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+// Lantern Glow
+@mixin lantern-glow($color: $color-lantern-gold) {
+  text-shadow: 0 0 10px rgba($color, 0.5), 
+               0 0 20px rgba($color, 0.3);
+}
+
+@mixin tablet {
+  @media (max-width: 768px) { @content; }
+}
+
+@mixin mobile {
+  @media (max-width: 480px) { @content; }
+}

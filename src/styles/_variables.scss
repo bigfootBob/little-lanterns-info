@@ -1,0 +1,17 @@
+// Colors from the image
+$color-sea-deep: #1a2a2d;      // Darkest ocean tones
+$color-sea-mid: #2c4a4f;       // Mid-tone waves
+$color-sky-storm: #4a5d61;     // Overcast sky grey
+$color-lantern-glow: #fdf5e6;  // Soft lighthouse light
+$color-lantern-gold: #ffcc33;  // Brightest point of the lamp
+
+// UI Brand Colors
+$primary-brand: $color-sea-deep;
+$accent-brand: $color-lantern-gold;
+$text-light: #ffffff;
+$text-muted: rgba(255, 255, 255, 0.7);
+
+// Spacing
+$spacing-sm: 8px;
+$spacing-md: 16px;
+$spacing-lg: 32px;

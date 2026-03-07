@@ -1,0 +1,32 @@
+@use 'variables' as *;
+@use 'mixins' as *;
+
+body {
+  margin: 0;
+  font-family: 'Inter', sans-serif;
+  -webkit-font-smoothing: antialiased;
+  position: relative;
+}
+
+.app-container {
+  background-image: url('../assets/images/background.webp'); //
+  background-size: cover;
+  min-height: 100vh;
+}
+
+h1 {
+  font-size: 3rem;
+  text-align: center;
+  color: aliceblue;
+  padding: 60px;
+}
+
+footer {
+  color: rgb(108, 161, 235);
+  text-align: center;
+  position: absolute;
+  bottom: 30px;
+  position: absolute;
+  bottom: 30px;
+  width: 100%;
+}
