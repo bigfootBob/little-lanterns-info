@@ -1,17 +1,58 @@
-// Colors from the image
-$color-sea-deep: #1a2a2d;      // Darkest ocean tones
-$color-sea-mid: #2c4a4f;       // Mid-tone waves
-$color-sky-storm: #4a5d61;     // Overcast sky grey
-$color-lantern-glow: #fdf5e6;  // Soft lighthouse light
-$color-lantern-gold: #ffcc33;  // Brightest point of the lamp
+// ── Palette ──────────────────────────────────────────────
+$color-sea-deep:    #1a2a2d;
+$color-sea-mid:     #2c4a4f;
+$color-sky-storm:   #4a5d61;
+$color-lantern-glow: #fdf5e6;
+$color-lantern-gold: #ffcc33;
 
-// UI Brand Colors
+// ── Brand ─────────────────────────────────────────────────
 $primary-brand: $color-sea-deep;
-$accent-brand: $color-lantern-gold;
-$text-light: #ffffff;
-$text-muted: rgba(255, 255, 255, 0.7);
+$accent-brand:  $color-lantern-gold;
+$text-light:    #ffffff;
+$text-muted:    rgba(255, 255, 255, 0.65);
 
-// Spacing
+// ── Layout ────────────────────────────────────────────────
+$nav-height:        70px;
+$content-max-width: 1200px;
+
+// ── Spacing ───────────────────────────────────────────────
+$spacing-xs: 4px;
 $spacing-sm: 8px;
 $spacing-md: 16px;
 $spacing-lg: 32px;
+$spacing-xl: 64px;
+
+// ── Radii ─────────────────────────────────────────────────
+$radius-sm: 4px;
+$radius-md: 8px;
+$radius-lg: 16px;
+
+// ── Surfaces ──────────────────────────────────────────────
+$overlay-dark:       rgba($color-sea-deep, 0.85);
+$card-bg:            rgba($color-sea-mid, 0.85);
+$card-border:        rgba($color-lantern-gold, 0.2);
+$card-border-subtle: rgba(255, 255, 255, 0.08);
+
+// ── Transitions ───────────────────────────────────────────
+$transition: all 0.2s ease;
+
+// ── Severity palette ──────────────────────────────────────
+$sev-1-fg: #81c784;
+$sev-1-bg: rgba(76, 175, 80, 0.15);
+$sev-1-br: rgba(76, 175, 80, 0.35);
+
+$sev-2-fg: #aed581;
+$sev-2-bg: rgba(139, 195, 74, 0.15);
+$sev-2-br: rgba(139, 195, 74, 0.35);
+
+$sev-3-fg: $color-lantern-gold;
+$sev-3-bg: rgba($color-lantern-gold, 0.15);
+$sev-3-br: rgba($color-lantern-gold, 0.35);
+
+$sev-4-fg: #ffb74d;
+$sev-4-bg: rgba(255, 152, 0, 0.15);
+$sev-4-br: rgba(255, 152, 0, 0.35);
+
+$sev-5-fg: #e57373;
+$sev-5-bg: rgba(244, 67, 54, 0.15);
+$sev-5-br: rgba(244, 67, 54, 0.35);

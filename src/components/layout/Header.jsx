@@ -1,18 +1,21 @@
- function Header () {
-  return (      
-      
-  <header className="main-nav">
-        {/* <div className="logo">Little Lanterns</div>
-        <nav>
-          <ul>
-            <li><a href="#about">About</a></li>
-            <li><a href="#features">Features</a></li>
-            <li><a href="http://littlelanterns.info/">Visit Site</a></li>
-          </ul>
-        </nav> */}
-      </header>
-  )}
+import { NavLink } from 'react-router-dom';
 
-  export default Header;
- 
- 
+function Header() {
+  return (
+    <header className="main-nav">
+      <div className="nav-container">
+        <NavLink to="/" className="nav-logo">
+          Little Lanterns
+        </NavLink>
+        <nav className="nav-links">
+          <NavLink to="/about">About</NavLink>
+          <NavLink to="/get-started">Get Started</NavLink>
+          <NavLink to="/community">Community</NavLink>
+          <NavLink to="/lanterns">Your Lanterns</NavLink>
+        </nav>
+      </div>
+    </header>
+  );
+}
+
+export default Header;
