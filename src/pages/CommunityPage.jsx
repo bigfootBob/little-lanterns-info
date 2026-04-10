@@ -3,11 +3,30 @@ import { useState } from 'react';
 function CommunityPage() {
   const [email, setEmail] = useState('');
   const [subscribed, setSubscribed] = useState(false);
+  const [error, setError] = useState('');
+  const [submitting, setSubmitting] = useState(false);
 
-  function handleSubscribe(e) {
+  async function handleSubscribe(e) {
     e.preventDefault();
-    if (email.trim()) {
-      setSubscribed(true);
+    setError('');
+    setSubmitting(true);
+    const honeypot = e.target.querySelector('input[name="website"]').value;
+    try {
+      const res = await fetch('/subscribe.php', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email, website: honeypot }),
+      });
+      const data = await res.json();
+      if (res.ok && data.success) {
+        setSubscribed(true);
+      } else {
+        setError(data.error || 'Something went wrong. Please try again.');
+      }
+    } catch {
+      setError('Something went wrong. Please try again.');
+    } finally {
+      setSubmitting(false);
     }
   }
 
@@ -35,16 +54,29 @@ function CommunityPage() {
                 <p>Thank you for subscribing. We will be in touch soon.</p>
               </div>
             ) : (
-              <form className="newsletter-form" onSubmit={handleSubscribe}>
-                <input
-                  type="email"
-                  placeholder="your@email.com"
-                  value={email}
-                  onChange={(e) => setEmail(e.target.value)}
-                  required
-                />
-                <button type="submit" className="btn btn-primary">Subscribe</button>
-              </form>
+              <>
+                <form className="newsletter-form" onSubmit={handleSubscribe} autoComplete="off">
+                  <input
+                    name="website"
+                    type="text"
+                    tabIndex={-1}
+                    autoComplete="off"
+                    style={{ position: 'absolute', left: '-9999px', width: '1px', height: '1px', opacity: 0 }}
+                    aria-hidden="true"
+                  />
+                  <input
+                    type="email"
+                    placeholder="your@email.com"
+                    value={email}
+                    onChange={(e) => setEmail(e.target.value)}
+                    required
+                  />
+                  <button type="submit" className="btn btn-primary" disabled={submitting}>
+                    {submitting ? 'Subscribing...' : 'Subscribe'}
+                  </button>
+                </form>
+                {error && <p className="error-message">{error}</p>}
+              </>
             )}
           </div>
         </section>

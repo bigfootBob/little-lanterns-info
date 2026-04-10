@@ -1,82 +1,51 @@
-const storms = [
-  {
-    id: 1,
-    date: '2026-04-07',
-    time: '08:14',
-    duration: '45 min',
-    type: 'Tonic-Clonic',
-    severity: 4,
-    notes: 'Post-ictal approx 30 min. Rescue med administered. Recovered by afternoon.',
-  },
-  {
-    id: 2,
-    date: '2026-04-03',
-    time: '12:32',
-    duration: '2 min',
-    type: 'Absence',
-    severity: 2,
-    notes: 'Brief, self-resolved during lunch. Teacher notified.',
-  },
-  {
-    id: 3,
-    date: '2026-03-28',
-    time: '07:05',
-    duration: '8 min',
-    type: 'Focal',
-    severity: 3,
-    notes: 'Morning. Possibly triggered by low-grade fever (99.8°F overnight).',
-  },
-  {
-    id: 4,
-    date: '2026-03-21',
-    time: '22:47',
-    duration: '3 min',
-    type: 'Absence',
-    severity: 1,
-    notes: 'Late night. Short duration, low severity. Went back to sleep.',
-  },
-  {
-    id: 5,
-    date: '2026-03-14',
-    time: '09:30',
-    duration: '12 min',
-    type: 'Tonic-Clonic',
-    severity: 4,
-    notes: 'Rescue med administered at 5 min mark. Recovered in approx 2 hours.',
-  },
-  {
-    id: 6,
-    date: '2026-03-06',
-    time: '14:15',
-    duration: '1 min',
-    type: 'Absence',
-    severity: 1,
-    notes: 'During OT session. Therapist documented and notified parents.',
-  },
-];
+import { useLanterns } from '../../contexts/LanternsContext';
+import { useEpisodes } from '../../hooks/useFirestoreData';
 
-const SEVERITY = {
-  1: { label: 'Mild',        cls: 'sev-1' },
-  2: { label: 'Low',         cls: 'sev-2' },
-  3: { label: 'Moderate',    cls: 'sev-3' },
-  4: { label: 'Significant', cls: 'sev-4' },
-  5: { label: 'Severe',      cls: 'sev-5' },
+const CALM_BY = {
+  seizure_stopped: { label: 'Seizure Ceased',     color: '#4caf50', bg: 'rgba(76,175,80,0.15)',    br: 'rgba(76,175,80,0.4)'    },
+  sensory_comfort: { label: 'Sensory & Comfort',  color: '#2196f3', bg: 'rgba(33,150,243,0.15)',   br: 'rgba(33,150,243,0.4)'   },
+  pressure:        { label: 'Pressure',           color: '#9c27b0', bg: 'rgba(156,39,176,0.15)',   br: 'rgba(156,39,176,0.4)'   },
+  vestibular:      { label: 'Vestibular',         color: '#ff9800', bg: 'rgba(255,152,0,0.15)',    br: 'rgba(255,152,0,0.4)'    },
+  environment:     { label: 'Environment',        color: '#009688', bg: 'rgba(0,150,136,0.15)',    br: 'rgba(0,150,136,0.4)'    },
+  other:           { label: 'Other',              color: '#78909c', bg: 'rgba(120,144,156,0.15)',  br: 'rgba(120,144,156,0.4)'  },
 };
 
+function formatDuration(seconds) {
+  if (!seconds) return '—';
+  const m = Math.floor(seconds / 60);
+  const s = seconds % 60;
+  if (m === 0) return `${s}s`;
+  if (s === 0) return `${m}m`;
+  return `${m}m ${s}s`;
+}
+
 function StormsPage() {
-  const thisMonth = storms.filter((s) => s.date.startsWith('2026-04')).length;
-  const avgSev = (storms.reduce((acc, s) => acc + s.severity, 0) / storms.length).toFixed(1);
+  const { childId }                              = useLanterns();
+  const { data: episodes, loading, error }       = useEpisodes(childId);
+
+  if (!childId)  return <div className="data-loading">Select a child profile above to view data.</div>;
+  if (loading)   return <div className="data-loading"><div className="spinner" />Loading storms&hellip;</div>;
+  if (error)     return <div className="data-loading" style={{ color: '#e57373' }}>Error loading data. Check your connection and Firestore indexes.</div>;
+
+  const now       = new Date();
+  const thisMonth = episodes.filter(
+    (e) => e.timestamp.getMonth() === now.getMonth() && e.timestamp.getFullYear() === now.getFullYear(),
+  ).length;
+
+  const avgSec =
+    episodes.length > 0
+      ? Math.round(episodes.reduce((s, e) => s + (e.duration_seconds || 0), 0) / episodes.length)
+      : null;
 
   return (
     <div className="storms-page">
       <div className="data-header">
         <h2>Storm Log</h2>
-        <button className="btn btn-primary btn-sm" disabled>+ Log Storm</button>
       </div>
 
       <div className="stat-cards">
         <div className="stat-card">
-          <div className="stat-value">{storms.length}</div>
+          <div className="stat-value">{episodes.length}</div>
           <div className="stat-label">Total Logged</div>
         </div>
         <div className="stat-card">
@@ -84,41 +53,56 @@ function StormsPage() {
           <div className="stat-label">This Month</div>
         </div>
         <div className="stat-card">
-          <div className="stat-value">{avgSev}</div>
-          <div className="stat-label">Avg Severity</div>
+          <div className="stat-value">{avgSec != null ? formatDuration(avgSec) : '—'}</div>
+          <div className="stat-label">Avg Duration</div>
         </div>
       </div>
 
-      <div className="data-table-wrapper">
-        <table className="data-table">
-          <thead>
-            <tr>
-              <th>Date</th>
-              <th>Time</th>
-              <th>Type</th>
-              <th>Duration</th>
-              <th>Severity</th>
-              <th>Notes</th>
-            </tr>
-          </thead>
-          <tbody>
-            {storms.map((storm) => (
-              <tr key={storm.id}>
-                <td>{storm.date}</td>
-                <td>{storm.time}</td>
-                <td>{storm.type}</td>
-                <td>{storm.duration}</td>
-                <td>
-                  <span className={`severity-badge ${SEVERITY[storm.severity].cls}`}>
-                    {SEVERITY[storm.severity].label}
-                  </span>
-                </td>
-                <td className="notes-cell">{storm.notes}</td>
+      {episodes.length === 0 ? (
+        <div className="chart-empty">No storms logged yet.</div>
+      ) : (
+        <div className="data-table-wrapper">
+          <table className="data-table">
+            <thead>
+              <tr>
+                <th>Date</th>
+                <th>Time</th>
+                <th>Duration</th>
+                <th>Calmed By</th>
+                <th>Notes</th>
               </tr>
-            ))}
-          </tbody>
-        </table>
-      </div>
+            </thead>
+            <tbody>
+              {episodes.map((ep) => {
+                const calm = CALM_BY[ep.calmed_by] ?? {
+                  label: ep.calmed_by || '—',
+                  color: '#78909c',
+                  bg:    'rgba(120,144,156,0.15)',
+                  br:    'rgba(120,144,156,0.4)',
+                };
+                return (
+                  <tr key={ep.id}>
+                    <td>{ep.timestamp.toLocaleDateString('en-US')}</td>
+                    <td>{ep.timestamp.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' })}</td>
+                    <td>{formatDuration(ep.duration_seconds)}</td>
+                    <td>
+                      {ep.calmed_by ? (
+                        <span
+                          className="calmed-by-badge"
+                          style={{ color: calm.color, background: calm.bg, borderColor: calm.br }}
+                        >
+                          {calm.label}
+                        </span>
+                      ) : '—'}
+                    </td>
+                    <td className="notes-cell">{ep.notes || '—'}</td>
+                  </tr>
+                );
+              })}
+            </tbody>
+          </table>
+        </div>
+      )}
     </div>
   );
 }
