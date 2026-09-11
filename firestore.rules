@@ -1,0 +1,49 @@
+rules_version = '2';
+
+// These rules are inferred from how the web client (src/hooks/useFirestoreData.js)
+// queries Firestore: `children` documents carry a `caregivers` array of auth
+// uids, and `episodes` / `gi_logs` / `health_notes` documents carry a
+// `childId` pointing at one of those `children` documents. They were written
+// from that client-side usage alone — review them against however the
+// companion mobile app writes this data (e.g. who is allowed to add/remove a
+// caregiver) before deploying, and test with the Firebase emulator.
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    function isSignedIn() {
+      return request.auth != null;
+    }
+
+    function isCaregiverOf(childId) {
+      return isSignedIn()
+        && exists(/databases/$(database)/documents/children/$(childId))
+        && request.auth.uid in get(/databases/$(database)/documents/children/$(childId)).data.caregivers;
+    }
+
+    match /children/{childId} {
+      allow read: if isSignedIn() && request.auth.uid in resource.data.caregivers;
+      allow create: if isSignedIn() && request.auth.uid in request.resource.data.caregivers;
+      allow update, delete: if isCaregiverOf(childId);
+    }
+
+    match /episodes/{episodeId} {
+      allow read, update, delete: if isCaregiverOf(resource.data.childId);
+      allow create: if isCaregiverOf(request.resource.data.childId);
+    }
+
+    match /gi_logs/{logId} {
+      allow read, update, delete: if isCaregiverOf(resource.data.childId);
+      allow create: if isCaregiverOf(request.resource.data.childId);
+    }
+
+    match /health_notes/{noteId} {
+      allow read, update, delete: if isCaregiverOf(resource.data.childId);
+      allow create: if isCaregiverOf(request.resource.data.childId);
+    }
+
+    // Deny everything else by default.
+    match /{document=**} {
+      allow read, write: if false;
+    }
+  }
+}

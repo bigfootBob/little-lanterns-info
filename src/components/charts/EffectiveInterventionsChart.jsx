@@ -42,41 +42,60 @@ function EffectiveInterventionsChart({ episodes }) {
   }
 
   return (
-    <ResponsiveContainer width="100%" height={210}>
-      <PieChart>
-        <Pie
-          data={data}
-          cx="50%"
-          cy="46%"
-          innerRadius={48}
-          outerRadius={80}
-          dataKey="value"
-          labelLine={false}
-          label={renderLabel}
-        >
-          {data.map((entry, i) => (
-            <Cell key={i} fill={entry.color} stroke="rgba(0,0,0,0.2)" />
+    <>
+      <div aria-hidden="true">
+        <ResponsiveContainer width="100%" height={210}>
+          <PieChart>
+            <Pie
+              data={data}
+              cx="50%"
+              cy="46%"
+              innerRadius={48}
+              outerRadius={80}
+              dataKey="value"
+              labelLine={false}
+              label={renderLabel}
+            >
+              {data.map((entry, i) => (
+                <Cell key={i} fill={entry.color} stroke="rgba(0,0,0,0.2)" />
+              ))}
+            </Pie>
+            <Tooltip
+              contentStyle={{
+                background: 'rgba(26,42,45,0.97)',
+                border: '1px solid rgba(255,204,51,0.25)',
+                borderRadius: 4,
+                fontSize: '0.78rem',
+              }}
+              formatter={(value, name) => [
+                `${value} (${Math.round((value / total) * 100)}%)`,
+                name,
+              ]}
+            />
+            <Legend
+              iconSize={8}
+              wrapperStyle={{ fontSize: '0.72rem', paddingTop: 8 }}
+              formatter={(v) => <span style={{ color: 'rgba(255,255,255,0.85)' }}>{v}</span>}
+            />
+          </PieChart>
+        </ResponsiveContainer>
+      </div>
+      <table className="sr-only">
+        <caption>What successfully calmed each storm</caption>
+        <thead>
+          <tr><th scope="col">Intervention</th><th scope="col">Count</th><th scope="col">Share</th></tr>
+        </thead>
+        <tbody>
+          {data.map((row) => (
+            <tr key={row.name}>
+              <th scope="row">{row.name}</th>
+              <td>{row.value}</td>
+              <td>{Math.round((row.value / total) * 100)}%</td>
+            </tr>
           ))}
-        </Pie>
-        <Tooltip
-          contentStyle={{
-            background: 'rgba(26,42,45,0.97)',
-            border: '1px solid rgba(255,204,51,0.25)',
-            borderRadius: 4,
-            fontSize: '0.78rem',
-          }}
-          formatter={(value, name) => [
-            `${value} (${Math.round((value / total) * 100)}%)`,
-            name,
-          ]}
-        />
-        <Legend
-          iconSize={8}
-          wrapperStyle={{ fontSize: '0.72rem', paddingTop: 8 }}
-          formatter={(v) => <span style={{ color: 'rgba(255,255,255,0.6)' }}>{v}</span>}
-        />
-      </PieChart>
-    </ResponsiveContainer>
+        </tbody>
+      </table>
+    </>
   );
 }
 

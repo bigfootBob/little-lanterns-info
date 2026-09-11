@@ -1,4 +1,37 @@
+import { useState } from 'react';
+
 function GetStartedPage() {
+  const [name, setName]     = useState('');
+  const [email, setEmail]   = useState('');
+  const [role, setRole]     = useState('');
+  const [submitting, setSubmitting] = useState(false);
+  const [submitted, setSubmitted]   = useState(false);
+  const [error, setError]           = useState('');
+
+  async function handleSubmit(e) {
+    e.preventDefault();
+    setError('');
+    setSubmitting(true);
+    const honeypot = e.target.querySelector('input[name="website"]').value;
+    try {
+      const res = await fetch('/waitlist.php', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ name, email, role, website: honeypot }),
+      });
+      const data = await res.json();
+      if (res.ok && data.success) {
+        setSubmitted(true);
+      } else {
+        setError(data.error || 'Something went wrong. Please try again.');
+      }
+    } catch {
+      setError('Something went wrong. Please try again.');
+    } finally {
+      setSubmitting(false);
+    }
+  }
+
   return (
     <div className="get-started-page page-overlay">
       <div className="section-container">
@@ -82,28 +115,64 @@ function GetStartedPage() {
             The app is currently in beta. Fill out the form below to join the waitlist
             and be notified when access opens.
           </p>
-          <form className="contact-form">
-            <div className="form-group">
-              <label htmlFor="ea-name">Name</label>
-              <input type="text" id="ea-name" placeholder="Your name" />
+          {submitted ? (
+            <div className="success-message">
+              <p>Thank you for joining the waitlist. We will be in touch when access opens.</p>
             </div>
-            <div className="form-group">
-              <label htmlFor="ea-email">Email</label>
-              <input type="email" id="ea-email" placeholder="your@email.com" />
-            </div>
-            <div className="form-group">
-              <label htmlFor="ea-role">Your Role</label>
-              <select id="ea-role" defaultValue="">
-                <option value="" disabled>Select your role</option>
-                <option value="parent">Parent / Guardian</option>
-                <option value="caregiver">Caregiver</option>
-                <option value="educator">Educator</option>
-                <option value="therapist">Therapist / Clinician</option>
-                <option value="other">Other</option>
-              </select>
-            </div>
-            <button type="submit" className="btn btn-primary">Join the Waitlist</button>
-          </form>
+          ) : (
+            <form className="contact-form" onSubmit={handleSubmit} autoComplete="off">
+              <input
+                name="website"
+                type="text"
+                tabIndex={-1}
+                autoComplete="off"
+                style={{ position: 'absolute', left: '-9999px', width: '1px', height: '1px', opacity: 0 }}
+                aria-hidden="true"
+              />
+              <div className="form-group">
+                <label htmlFor="ea-name">Name</label>
+                <input
+                  type="text"
+                  id="ea-name"
+                  placeholder="Your name"
+                  value={name}
+                  onChange={(e) => setName(e.target.value)}
+                  required
+                />
+              </div>
+              <div className="form-group">
+                <label htmlFor="ea-email">Email</label>
+                <input
+                  type="email"
+                  id="ea-email"
+                  placeholder="your@email.com"
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
+                  required
+                />
+              </div>
+              <div className="form-group">
+                <label htmlFor="ea-role">Your Role</label>
+                <select
+                  id="ea-role"
+                  value={role}
+                  onChange={(e) => setRole(e.target.value)}
+                  required
+                >
+                  <option value="" disabled>Select your role</option>
+                  <option value="parent">Parent / Guardian</option>
+                  <option value="caregiver">Caregiver</option>
+                  <option value="educator">Educator</option>
+                  <option value="therapist">Therapist / Clinician</option>
+                  <option value="other">Other</option>
+                </select>
+              </div>
+              <button type="submit" className="btn btn-primary" disabled={submitting}>
+                {submitting ? 'Joining...' : 'Join the Waitlist'}
+              </button>
+              {error && <p className="error-message">{error}</p>}
+            </form>
+          )}
         </section>
 
       </div>

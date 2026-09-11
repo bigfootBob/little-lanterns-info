@@ -1,4 +1,37 @@
+import { useState } from 'react';
+
 function AboutPage() {
+  const [name, setName]         = useState('');
+  const [email, setEmail]       = useState('');
+  const [message, setMessage]   = useState('');
+  const [submitting, setSubmitting] = useState(false);
+  const [submitted, setSubmitted]   = useState(false);
+  const [error, setError]           = useState('');
+
+  async function handleSubmit(e) {
+    e.preventDefault();
+    setError('');
+    setSubmitting(true);
+    const honeypot = e.target.querySelector('input[name="website"]').value;
+    try {
+      const res = await fetch('/contact.php', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ name, email, message, website: honeypot }),
+      });
+      const data = await res.json();
+      if (res.ok && data.success) {
+        setSubmitted(true);
+      } else {
+        setError(data.error || 'Something went wrong. Please try again.');
+      }
+    } catch {
+      setError('Something went wrong. Please try again.');
+    } finally {
+      setSubmitting(false);
+    }
+  }
+
   return (
     <div className="about-page page-overlay">
       <div className="section-container">
@@ -89,21 +122,59 @@ function AboutPage() {
             Have questions, feedback, or want to get involved in building Little Lanterns?
             We&rsquo;d love to hear from you.
           </p>
-          <form className="contact-form">
-            <div className="form-group">
-              <label htmlFor="contact-name">Name</label>
-              <input type="text" id="contact-name" placeholder="Your name" />
+          {submitted ? (
+            <div className="success-message">
+              <p>Thank you for reaching out. We will be in touch soon.</p>
             </div>
-            <div className="form-group">
-              <label htmlFor="contact-email">Email</label>
-              <input type="email" id="contact-email" placeholder="your@email.com" />
-            </div>
-            <div className="form-group">
-              <label htmlFor="contact-message">Message</label>
-              <textarea id="contact-message" rows={5} placeholder="Your message..." />
-            </div>
-            <button type="submit" className="btn btn-primary">Send Message</button>
-          </form>
+          ) : (
+            <form className="contact-form" onSubmit={handleSubmit} autoComplete="off">
+              <input
+                name="website"
+                type="text"
+                tabIndex={-1}
+                autoComplete="off"
+                style={{ position: 'absolute', left: '-9999px', width: '1px', height: '1px', opacity: 0 }}
+                aria-hidden="true"
+              />
+              <div className="form-group">
+                <label htmlFor="contact-name">Name</label>
+                <input
+                  type="text"
+                  id="contact-name"
+                  placeholder="Your name"
+                  value={name}
+                  onChange={(e) => setName(e.target.value)}
+                  required
+                />
+              </div>
+              <div className="form-group">
+                <label htmlFor="contact-email">Email</label>
+                <input
+                  type="email"
+                  id="contact-email"
+                  placeholder="your@email.com"
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
+                  required
+                />
+              </div>
+              <div className="form-group">
+                <label htmlFor="contact-message">Message</label>
+                <textarea
+                  id="contact-message"
+                  rows={5}
+                  placeholder="Your message..."
+                  value={message}
+                  onChange={(e) => setMessage(e.target.value)}
+                  required
+                />
+              </div>
+              <button type="submit" className="btn btn-primary" disabled={submitting}>
+                {submitting ? 'Sending...' : 'Send Message'}
+              </button>
+              {error && <p className="error-message">{error}</p>}
+            </form>
+          )}
         </section>
 
       </div>
